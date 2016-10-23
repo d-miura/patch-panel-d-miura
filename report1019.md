@@ -56,7 +56,7 @@ NXST_FLOW reply (xid=0x4):
 ###0.1 コード
 ####0.1.1 /lib/patch_panel.ｒｂへの追記内容
 start,create_patch,delete_patchの各ハンドラの処理を変更した．
-####0.1.1 /bin/patch_panelhへの追記内容
+####0.1.2 /bin/patch_panelhへの追記内容
 コードの変更は行わなかった．
 ###0.2 動作確認
 以下の手順で動作確認を行った
@@ -90,13 +90,13 @@ NXST_FLOW reply (xid=0x4):
 
 ##1. ポートのミラーリング
 以下のように`パッチパネルのid，モニターポート，ミラーポート`を引数で与えて実行するpatch_panelのサブコマンド`create_mirror`を実装した．
-''$ ./bin/patch_panel create_mirror dpid monitor_port mirror_port``
+``[使用例]$ ./bin/patch_panel create_mirror dpid monitor_port mirror_port``
 
 ミラーポートにはモニターポートの送受信する内容が出力される．
 ###1.1 コード
 ####1.1.1 /lib/patch_panel.ｒｂへの追記内容
 create_mirrorハンドラと，プライベートメソッドadd_mirror_entriesを追加
-####1.1.1 /bin/patch_panelhへの追記内容
+####1.1.2 /bin/patch_panelhへの追記内容
 コマンドcreate_mirrorを定義
 ###1.2 動作確認
 以下のpatch_panel.confで示すネットワーク構成で動作確認を行った．
@@ -153,16 +153,30 @@ Packets received:
 
 ##2. パッチとポートミラーリングの一覧
 以下のように実行するpatch_panelのサブコマンド``list``として実装した．
+``[使用例]$ ./bin/patch_panel list dpid``
+patch_panel.rbにメソッドlistを作成し，インスタンス変数@patchと@mirrorの中身を出力した．
 ###2.1 コード
 ####2.1.1 /lib/patch_panel．ｒｂへの追記内容
-####2.1.1 /bin/patch_panelhへの追記内容
+メソッドlistを作成
+####2.1.2 /bin/patch_panelhへの追記内容
+コマンドlistを定義
 ###2.2 動作確認
+以下の入力を行った．
 
+```
+$ ./bin/patch_panel create 0xabc 1 2
+$ ./bin/patch_panel create 0xabc 4 3
+$ ./bin/patch_panel create_mirror 0xabc 2 5
+$ ./bin/patch_panel list 0xabc
+```
 
-##3. ポートミラーリングの削除(拡張課題)
-以下のように`パッチパネルのid，モニターポート，ミラーポート`を引数で与えて実行するpatch_panelのサブコマンド`delete_mirror`を実装した．
-''$ ./bin/patch_panel delete_mirror dpid monitor_port mirror_port``
-###3.1 コード
-####3.1.1 /lib/patch_panel．ｒｂへの追記内容
-####3.1.1 /bin/patch_panelhへの追記内容
-###3.2 動作確認
+trema runプロセスにおける出力は以下となった．
+```
+PatchPanel started.
+--------------------------------------------------
+list of patch (dpid = 0xabc)
+1 <---> 2
+3 <---> 4
+list of mirror (dpid = 0xabc)
+2 ----> 5(mirror)
+```

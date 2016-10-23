@@ -66,6 +66,20 @@ class PatchPanel < Trema::Controller
     @mirror[dpid] << [port_monitor, port_mirror]
   end
 
+
+  def list(dpid)
+    logger.info "--------------------------------------------------"
+    logger.info "list of patch \(dpid = #{dpid.to_hex}\)"
+    @patch[dpid].each do |p0,p1|
+      logger.info "#{p0} <---> #{p1}"
+    end
+
+    logger.info "list of mirror \(dpid = #{dpid.to_hex}\)"
+    @mirror[dpid].each do |p0,p1|
+      logger.info "#{p0} ----> #{p1}(mirror)"
+    end
+  end
+
   private
 
   def add_flow_entries(dpid, port_a, port_b)
