@@ -15,10 +15,20 @@
 ---
 
 #解答
+##0. 配布されたpatch_panel.rbのバグ修正
+[成元君のレポート](https://github.com/handai-trema/patch-panel-r-narimoto/blob/master/report.md#bug)を参考に課題用リポジトリのdevelopブランチの/lib/patch_panel.rbでもともとなされている実装では，パッチを管理するインスタンス変数@patchが正しく動作しないことを確認した．
+
+[図１]に示すように，もし，datapath_id=0xabcとなるパッチパネルにport1とport2，port１とport3をつなぐパッチを作成した後に，port1とport3をつなぐパッチのみを削除した場合，@patchはport1とport2をつなぐパッチの情報を保持できていない事がわかる．
+
+![図１](./fig_bug.png "図１")
+
+
+
 ##1. ポートのミラーリング
-以下のように``パッチパネルのid，ミラーポート，モニターポート``を引数で与えて実行するpatch_panelのサブコマンド``mirror``を実装した．
+以下のように`パッチパネルのid，モニターポート，ミラーポート`を引数で与えて実行するpatch_panelのサブコマンド`mirror`を実装した．
+''$ ./bin/patch_panel mirror dpid monitor_port mirror_port``
 ###1.1 コード
-####1.1.1 /lib/patch_panel．ｒｂへの追記内容
+####1.1.1 /lib/patch_panel.ｒｂへの追記内容
 ####1.1.1 /bin/patch_panelhへの追記内容
 ###1.2 動作確認
 
