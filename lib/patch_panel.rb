@@ -2,7 +2,6 @@
 class PatchPanel < Trema::Controller
   def start(_args)
     @patch = Hash.new { |hash, key| hash[key] = [] }
-    @mirror = Hash.new { |hash, key| hash[key] = [] }
     logger.info 'PatchPanel started.'
   end
 
