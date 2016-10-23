@@ -18,9 +18,9 @@
 ##0. 配布されたpatch_panel.rbのバグ修正
 [成元君のレポート](https://github.com/handai-trema/patch-panel-r-narimoto/blob/master/report.md#bug)を参考に課題用リポジトリのdevelopブランチの/lib/patch_panel.rbでもともとなされている実装では，パッチを管理するインスタンス変数@patchが正しく動作しないことを確認した．
 
-[図１]に示すように，二次元配列でパッチの情報が管理されていないので，もし，datapath_id=0xabcとなるパッチパネルにport1とport2，port１とport3をつなぐパッチを作成した後に，port1とport3をつなぐパッチのみを削除した場合，@patchはport1とport2をつなぐパッチの情報を保持できていない事がわかる．
+[図１]（https://github.com/handai-trema/patch-panel-d-miura/blob/master/fig_bug.png）に示すように，二次元配列でパッチの情報が管理されていないので，もし，datapath_id=0xabcとなるパッチパネルにport1とport2，port１とport3をつなぐパッチを作成した後に，port1とport3をつなぐパッチのみを削除した場合，@patchはport1とport2をつなぐパッチの情報を保持できていない事がわかる．
 
-![図１](https://github.com/handai-trema/patch-panel-d-miura/blob/master/fig_bug.png "図１")
+![図１](./fig_bug.png "図１")
 
 
 
