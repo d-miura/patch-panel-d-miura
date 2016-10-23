@@ -2,6 +2,7 @@
 class PatchPanel < Trema::Controller
   def start(_args)
     @patch = Hash.new { |hash, key| hash[key] = [] }
+    @mirror = Hash.new { |hash, key| hash[key] = [] }
     logger.info 'PatchPanel started.'
   end
 
@@ -15,7 +16,7 @@ class PatchPanel < Trema::Controller
   def create_patch(dpid, port_a, port_b)
     @patch[dpid].each do |ports|
       if(ports.include?(port_a) or ports.include?(port_b))
-        logger.info 'Duplicated port is designated.'
+        logger.info 'Duplicated patch is designated.'
         return
       end
     end
@@ -35,6 +36,36 @@ class PatchPanel < Trema::Controller
     logger.info 'Designated patch is not exist.'
   end
 
+  def create_mirror(dpid, port_monitor, port_mirror)
+    @mirror[dpid].each do |p0, p1|
+      if(p1 ==  port_mirror)
+        logger.info "Port#{port_mirror} is alerady used as mirror."
+        return
+      end
+    end
+
+    @patch[dpid].each do |p0,p1|
+      if(p0 == port_mirror or p1 == port_mirror)
+        logger.info "Port#{port_mirror} is alerady used as patch."
+        return
+      end
+    end
+
+    port_patched = nil
+    @patch[dpid].each do |p0,p1|
+      port_patched = p0 if (p1 == port_monitor)
+      port_patched = p1 if (p0 == port_monitor)
+    end
+
+    if port_patched == nil
+      logger.info "Port#{port_monitor} is not patched."
+      return
+    end
+
+    add_mirror_entries(dpid, port_monitor, port_mirror, port_patched)
+    @mirror[dpid] << [port_monitor, port_mirror]
+  end
+
   private
 
   def add_flow_entries(dpid, port_a, port_b)
@@ -49,5 +80,20 @@ class PatchPanel < Trema::Controller
   def delete_flow_entries(dpid, port_a, port_b)
     send_flow_mod_delete(dpid, match: Match.new(in_port: port_a))
     send_flow_mod_delete(dpid, match: Match.new(in_port: port_b))
+  end
+
+  def add_mirror_entries(dpid, port_monitor, port_mirror, port_monitor_patched)
+    send_flow_mod_add(dpid,
+                      match: Match.new(in_port: port_monitor),
+                      actions: [
+                        SendOutPort.new(port_monitor_patched),
+                        SendOutPort.new(port_mirror),
+                      ])
+    send_flow_mod_add(dpid,
+                      match: Match.new(in_port: port_monitor_patched),
+                      actions: [
+                        SendOutPort.new(port_monitor),
+                        SendOutPort.new(port_mirror),
+                      ])
   end
 end
