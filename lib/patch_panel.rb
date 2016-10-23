@@ -1,8 +1,8 @@
 # Software patch-panel.
 class PatchPanel < Trema::Controller
   def start(_args)
-    @patch = Hash.new { |hash, key| hash[key] = {} }
-    @mirror = Hash.new { |hash, key| hash[key] = {} }
+    @patch = Hash.new { |hash, key| hash[key] = [] }
+    @mirror = Hash.new { |hash, key| hash[key] = [] }
     logger.info 'PatchPanel started.'
   end
 
@@ -14,18 +14,26 @@ class PatchPanel < Trema::Controller
   end
 
   def create_patch(dpid, port_a, port_b)
+    @patch[dpid].each do |ports|
+      if(ports.include?(port_a) or ports.include?(port_b))
+        logger.info 'Duplicated port is designated.'
+        return
+      end
+    end
     add_flow_entries dpid, port_a, port_b
     @patch[dpid] << [port_a, port_b].sort
   end
 
   def delete_patch(dpid, port_a, port_b)
-    delete_flow_entries dpid, port_a, port_b
-    @patch[dpid].delete([port_a, port_b].sort)
-  end
+    @patch[dpid].each do |ports|
+      if(ports.include?(port_a) and ports.include?(port_b))
+        delete_flow_entries dpid, port_a, port_b
+        @patch[dpid].delete([port_a, port_b].sort)
+        return
+      end
+    end
 
-
-  def create_mirror(dpid, port_monitor, port_mirror)
-
+    logger.info 'Designated patch is not exist.'
   end
 
   private
