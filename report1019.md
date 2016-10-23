@@ -16,13 +16,23 @@
 
 #解答
 ##0. 配布されたpatch_panel.rbのバグ修正
-[成元君のレポート](https://github.com/handai-trema/patch-panel-r-narimoto/blob/master/report.md#bug)を参考に課題用リポジトリのdevelopブランチの/lib/patch_panel.rbでもともとなされている実装では，パッチを管理するインスタンス変数@patchが正しく動作しないことを確認した．
+[成元君のレポート](https://github.com/handai-trema/patch-panel-r-narimoto/blob/master/report.md#bug)を参考に課題用リポジトリのdevelopブランチの/lib/patch_panel.rbでもともとなされている実装では，各パッチは宣言時から1次元の配列で管理されており，パッチを管理するインスタンス変数@patchが正しく動作しないことを確認した．
 
-[図1](https://github.com/handai-trema/patch-panel-d-miura/blob/master/fig_bug.png)に示すように，二次元配列でパッチの情報が管理されていないので，もし，datapath_id=0xabcとなるパッチパネルにport1とport2，port１とport3をつなぐパッチを作成した後に，port1とport3をつなぐパッチのみを削除した場合，@patchはport1とport2をつなぐパッチの情報を保持できていない事がわかる．
+下記の例で示すように，+演算子は配列の連結を，-演算子は差集合を行う．このため，もし，dｐid=0xabcとなるパッチパネルにport1とport2，port１とport3をつなぐパッチを作成した後に，port1とport3をつなぐパッチのみを削除した場合，@patchはport1とport2をつなぐパッチの情報を保持できていない事がわかる．
 
-![図１](./fig_bug.png "図１")
+```
+ensyuu2@ensyuu2-VirtualBox:~$ irb
+2.2.5 :001 > patch = Hash.new{[]}
+ => {}
+2.2.5 :002 > patch[0xabc] += [1,2].sort
+ => [1, 2]
+2.2.5 :003 > patch[0xabc] += [3,1].sort
+ => [1, 2, 1, 3]
+2.2.5 :004 > patch[0xabc] -= [1,3].sort
+ => [2]
+```
 
-
+そこで，インスタンス変数@patchの宣言を変更した上で，パッチの追加と削除に関する処理は+=と-=を用いるのではなく，<<とArrayクラスのdeleteメソッドを用いて行うように変更した．
 
 ##1. ポートのミラーリング
 以下のように`パッチパネルのid，モニターポート，ミラーポート`を引数で与えて実行するpatch_panelのサブコマンド`mirror`を実装した．
