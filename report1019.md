@@ -90,6 +90,7 @@ NXST_FLOW reply (xid=0x4):
 
 ##1. ポートのミラーリング
 以下のように`パッチパネルのid，モニターポート，ミラーポート`を引数で与えて実行するpatch_panelのサブコマンド`create_mirror`を実装した．
+
 ``[使用例]$ ./bin/patch_panel create_mirror dpid monitor_port mirror_port``
 
 ミラーポートにはモニターポートの送受信する内容が出力される．
@@ -153,7 +154,9 @@ Packets received:
 
 ##2. パッチとポートミラーリングの一覧
 以下のように実行するpatch_panelのサブコマンド``list``として実装した．
+
 ``[使用例]$ ./bin/patch_panel list dpid``
+
 patch_panel.rbにメソッドlistを作成し，インスタンス変数@patchと@mirrorの中身を出力した．
 ###2.1 コード
 ####2.1.1 /lib/patch_panel．ｒｂへの追記内容
